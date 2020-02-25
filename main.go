@@ -4,42 +4,50 @@ import (
 	//"github.com/achievermina/IndeedWebScrapping-API/scrapper"
 	"net/http"
 	"log"
+	"fmt"
 	"github.com/gorilla/mux"
+	"io/ioutil"
+	"encoding/json"
 )
 
-//type Handler interface {
-//	ServeHTTP(ResponseWrtier, *Request)
-//}
+//https://medium.com/the-andela-way/build-a-restful-json-api-with-golang-85a83420c9da
 
-//type server struct {}
-func get(w http.ResponseWriter, r *http.Request) {
+type event struct {
+	userID          string `json:"userID"`
+	Title       string `json:"Title"`
+}
+
+type allEvents []event
+
+var events = allEvents{
+	{
+		userID:          "1",
+		Title:       "Introduction to Golang",
+	},
+}
+
+var searchterm string
+var allsearch []string
+
+func home(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte(`{"message": "get called"}`))
 }
 
-func post(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
+func createEvent(w http.ResponseWriter, r *http.Request) {
+	var newEvent event
+	//var newSearch string
+	reqBody, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		fmt.Fprintf(w, "please type the word you are searching for")
+	}
+
+	json.Unmarshal(reqBody, &newEvent)
+	//allsearch = append(allsearch, newSearch)
+	events = append(events, newEvent)
 	w.WriteHeader(http.StatusCreated)
-	w.Write([]byte(`{"message": "post called"}`))
-}
-
-func put(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusAccepted)
-	w.Write([]byte(`{"message": "put called"}`))
-}
-
-func delete(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(`{"message": "delete called"}`))
-}
-
-func notFound(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusNotFound)
-	w.Write([]byte(`{"message": "not found"}`))
+	json.NewEncoder(w).Encode(newEvent)
 }
 
 func main() {
@@ -47,12 +55,9 @@ func main() {
 	//scrapper.Scrape(term)
 
 	r := mux.NewRouter()
-	r.HandleFunc("/", get).Methods(http.MethodGet)
-	r.HandleFunc("/", post).Methods(http.MethodPost)
-	r.HandleFunc("/", put).Methods(http.MethodPut)
-	r.HandleFunc("/", delete).Methods(http.MethodDelete)
-	r.HandleFunc("/", notFound)
-	log.Fatalln(http.ListenAndServe(":8080", nil))
+	r.HandleFunc("/", home)
+	r.HandleFunc("/event", createEvent).Methods("GET")
+	log.Fatalln(http.ListenAndServe(":8080", r))
 
 }
 
