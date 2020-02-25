@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"github.com/PuerkitoBio/goquery"
 	"strings"
+	"log"
 )
 
 type extractedJob struct {
@@ -40,11 +41,15 @@ func getPage(page int, baseURL string, mainC chan<-[]extractedJob) {
 	c := make(chan extractedJob)
 	pageURL := baseURL + "&start=" + strconv.Itoa(page*10)
 	fmt.Println("Requesting: ", pageURL)
-	res, _ := http.Get(pageURL)
+	res, err := http.Get(pageURL)
+	checkError(err)
+	checkCode(res)
+
 
 	defer res.Body.Close()
 
-	doc, _ := goquery.NewDocumentFromReader(res.Body)
+	doc, err := goquery.NewDocumentFromReader(res.Body)
+	checkError(err)
 	searchCards := doc.Find(".jobsearch-SerpJobCard")
 	searchCards.Each(func(i int, card *goquery.Selection){
 		go extractJob(card, c)
@@ -71,11 +76,14 @@ func extractJob(card *goquery.Selection, c chan<- extractedJob) {
 //Check how many pages in Indeed
 func getPages(baseURL string) int {
 	pages := 0
-	res, _ := http.Get(baseURL)
+	res, err := http.Get(baseURL)
+	checkError(err)
+	checkCode(res)
 
 	defer res.Body.Close()
 
-	doc, _ := goquery.NewDocumentFromReader(res.Body)
+	doc, err := goquery.NewDocumentFromReader(res.Body)
+	checkError(err)
 	doc.Find(".pagination").Each(func(i int, s *goquery.Selection) {
 		pages = s.Find("a").Length() // how many page links are in there
 	})
@@ -86,4 +94,16 @@ func getPages(baseURL string) int {
 
 func ClearText(text string) string{
 	return strings.Join(strings.Fields(strings.TrimSpace(text))," ")
+}
+
+func checkError(err error){
+	if err != nil {
+		log.Fatalln(err)
+	}
+}
+
+func checkCode(res *http.Response){
+	if res.StatusCode != 200 {
+		log.Fatalln("Request failed: ", res.StatusCode)
+	}
 }
