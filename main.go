@@ -1,64 +1,110 @@
 package main
 
 import (
-	//"github.com/achievermina/IndeedWebScrapping-API/scrapper"
-	"net/http"
 	"log"
+	"net/http"
+	"github.com/achievermina/IndeedWebScrapping-API/scrapper"
+	"strings"
 	"fmt"
-	"github.com/gorilla/mux"
-	"io/ioutil"
 	"encoding/json"
+	"github.com/gorilla/mux"
 )
 
 //https://medium.com/the-andela-way/build-a-restful-json-api-with-golang-85a83420c9da
 
-type event struct {
-	userID          string `json:"userID"`
-	Title       string `json:"Title"`
-}
-
-type allEvents []event
-
-var events = allEvents{
-	{
-		userID:          "1",
-		Title:       "Introduction to Golang",
-	},
-}
-
-var searchterm string
-var allsearch []string
-
 func home(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(`{"message": "get called"}`))
+	//
+	//term, ok := r.URL.Query()["term"]  //query string --> GET
+	//
+	//if !ok || len(term[0]) < 1 {
+	//	log.Println("Url Param 'term' is missing")
+	//	return
+	//}
+
+	term := "python"
+	fmt.Println(term)
+
+	searchTerm := strings.ToLower(scrapper.ClearText(term))
+	res := scrapper.Scrape(searchTerm)
+	fmt.Println(res)
+
 }
 
-func createEvent(w http.ResponseWriter, r *http.Request) {
-	var newEvent event
-	//var newSearch string
-	reqBody, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		fmt.Fprintf(w, "please type the word you are searching for")
-	}
 
-	json.Unmarshal(reqBody, &newEvent)
-	//allsearch = append(allsearch, newSearch)
-	events = append(events, newEvent)
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(newEvent)
-}
 
 func main() {
-	//term :="python"
-	//scrapper.Scrape(term)
+	term := "python"
+	fmt.Println(term)
+	searchTerm := strings.ToLower(scrapper.ClearText(term))
+	res := scrapper.Scrape(searchTerm)
+	// http response --> excel download
+	//http api response excel
 
 	r := mux.NewRouter()
 	r.HandleFunc("/", home)
-	r.HandleFunc("/event", createEvent).Methods("GET")
 	log.Fatalln(http.ListenAndServe(":8080", r))
 
+	err = json.NewDecoder(r.Body).Decode(&res)
+	newsJson, err := json.Marshal(news)
+	if err != nil {
+		panic(err)
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusAccepted)
+	w.Write(newsJson)
+
+
+	//http.HandleFunc("/", home)
+	//http.ListenAndServe(":8080", nil)
 }
 
 
+//
+//type event struct {
+//	userID          string `json:"userID"`
+//	Title       string `json:"Title"`
+//}
+//
+//type allEvents []event
+//
+//var events = allEvents{
+//	{
+//		userID:          "1",
+//		Title:       "Introduction to Golang",
+//	},
+//}
+//
+//var searchterm string
+//var allsearch []string
+//
+//func home(w http.ResponseWriter, r *http.Request) {
+//	w.Header().Set("Content-Type", "application/json")
+//	w.WriteHeader(http.StatusOK)
+//	w.Write([]byte(`{"message": "get called"}`))
+//}
+//
+//func createEvent(w http.ResponseWriter, r *http.Request) {
+//	var newEvent event
+//	//var newSearch string
+//	reqBody, err := ioutil.ReadAll(r.Body)
+//	if err != nil {
+//		fmt.Fprintf(w, "please type the word you are searching for")
+//	}
+//
+//	json.Unmarshal(reqBody, &newEvent)
+//	//allsearch = append(allsearch, newSearch)
+//	events = append(events, newEvent)
+//	w.WriteHeader(http.StatusCreated)
+//	json.NewEncoder(w).Encode(newEvent)
+//}
+//
+//func main() {
+//	//term :="python"
+////	//scrapper.Scrape(term)
+////
+//	r := mux.NewRouter()
+//	r.HandleFunc("/", home)
+//	r.HandleFunc("/event", createEvent).Methods("GET")
+//	log.Fatalln(http.ListenAndServe(":8080", r))
+//
+//}

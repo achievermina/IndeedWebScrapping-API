@@ -7,31 +7,34 @@ import (
 	"github.com/PuerkitoBio/goquery"
 	"strings"
 	"log"
+	"encoding/json"
 )
 
 type extractedJob struct {
-	id string
-	jobTitle string
-	location string
-	salary string
-	summary string
+	id string  `json:"ID"`
+	jobTitle string  `json:"Title"`
+	location string  `json:"Location"`
+	salary string  `json:"Salary"`
+	summary string  `json:"Description"`
 }
 
-func Scrape(term string) {
+func Scrape(term string) []extractedJob{
 	var baseURL  = "https://www.indeed.com/jobs?q="+term+"&l=Brooklyn%2C+NY"
 	var mainC = make(chan []extractedJob)
 	var totalJobs []extractedJob
-	totalPages := getPages(baseURL)
+	//totalPages := getPages(baseURL)
 
-	for i := 0; i < totalPages; i++ {
+	for i := 0; i < 1; i++ {
 		go getPage(i, baseURL, mainC)
 	}
 
-	for i := 0; i < totalPages; i++ {
+	for i := 0; i < 1; i++ {
 		jobs := <-mainC
 		totalJobs = append(totalJobs, jobs...)
 	}
 	//fmt.Println(totalJobs)
+	//writeJobs(totalJobs)
+	return totalJobs
 	fmt.Println("Done, Extracted all jobs")
 }
 
@@ -90,6 +93,28 @@ func getPages(baseURL string) int {
 	fmt.Println(pages)
 	return pages
 
+}
+
+func writeJobs(jobs []extractedJob) {
+	jobsJson, err := json.Marshal(jobs)
+	checkError(err)
+	fmt.Println("here")
+
+	fmt.Println(string(jobsJson))
+	//
+	//w := csv.NewWriter(file)
+	//defer w.Flush()
+	//
+	//headers := []string{"ID", "Title", "Location", "Salary", "Summary"}
+	//wErr := w.Write(headers)
+	//checkError(wErr)
+	//
+	//for _, job := range jobs {
+	//	jobSlice := []string{ "https://www.indeed.com/jobs?q=Full Time&l=Brooklyn%2C NY&start=20&advn=3056737823750295&vjk="+job.id, job.jobTitle, job.location, job.salary, job.summary}
+	//	//fmt.Println(job.id, job.jobTitle, job.location, job.salary, job.summary)
+	//	jwErr := w.Write(jobSlice)
+	//	checkError(jwErr)
+	//}
 }
 
 func ClearText(text string) string{
