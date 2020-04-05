@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+package scrapper;
+
+
+message searchRequest {
+    string term =1;
+}
+
+message jobObject {
+    string id = 1;
+    string title = 2;
+    string location = 3;
+    string salary = 4;
+    string summary = 5;
+}
+
+message searchResponse {
+    repeated jobObject jobs = 1;
+}
+
+service jobService {
+    rpc Search(searchRequest) returns (searchResponse){}
+}
+
+
+
+//import "google/api/annotations.proto";
+//service jobService {
+//    rpc Search(searchRequest) returns (searchResponse){
+//        option (google.api.http) = {
+//        post: "/indeedsearch/job"
+//        body: "*"
+//    };
+//    }
+//}
