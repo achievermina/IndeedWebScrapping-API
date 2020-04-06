@@ -16,7 +16,7 @@ type Server struct {
 }
 
 // proto file 에는 첫문장 capital 아니더라도 여기서는 Must 첫 letter capital
-func (s *Server) Search(ctx context.Context, req *sc_server.SearchRequest) (*sc_server.SearchResponse) {
+func (s *Server) Search(ctx context.Context, req *sc_server.SearchRequest) (*sc_server.SearchResponse, error) {
 	log.Printf("get tasks search term: %v", req.Term)
 	var jobs []*sc_server.JobObject
 	//job1 := &sc_server.JobObject{
@@ -50,7 +50,7 @@ func (s *Server) Search(ctx context.Context, req *sc_server.SearchRequest) (*sc_
 		}
 		jobs = append(jobs,job)
 	}
-	return &sc_server.SearchResponse{Jobs: jobs}
+	return &sc_server.SearchResponse{Jobs: jobs}, nil
 }
 
 func main() {

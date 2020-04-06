@@ -16,21 +16,9 @@ message jobObject {
 }
 
 message searchResponse {
-    repeated jobObject jobs = 1 [packed=true];
+    repeated jobObject jobs = 1;
 }
 
 service jobService {
     rpc Search(searchRequest) returns (searchResponse){}
 }
-
-
-
-//import "google/api/annotations.proto";
-//service jobService {
-//    rpc Search(searchRequest) returns (searchResponse){
-//        option (google.api.http) = {
-//        post: "/indeedsearch/job"
-//        body: "*"
-//    };
-//    }
-//}

@@ -78,7 +78,7 @@ func getPages(baseURL string) int {
 	pages := 0
 	res, err := http.Get(baseURL)
 	checkError(err)
-	//checkCode(res)
+	checkCode(res)
 
 	defer res.Body.Close()
 
@@ -91,28 +91,6 @@ func getPages(baseURL string) int {
 	return pages
 
 }
-//
-//func writeJobs(jobs []extractedJob) {
-//	jobsJson, err := json.Marshal(jobs)
-//	checkError(err)
-//	fmt.Println("here")
-//
-//	fmt.Println(string(jobsJson))
-//	//
-	//w := csv.NewWriter(file)
-	//defer w.Flush()
-	//
-	//headers := []string{"ID", "Title", "Location", "Salary", "Summary"}
-	//wErr := w.Write(headers)
-	//checkError(wErr)
-	//
-	//for _, job := range jobs {
-	//	jobSlice := []string{ "https://www.indeed.com/jobs?q=Full Time&l=Brooklyn%2C NY&start=20&advn=3056737823750295&vjk="+job.id, job.jobTitle, job.location, job.salary, job.summary}
-	//	//fmt.Println(job.id, job.jobTitle, job.location, job.salary, job.summary)
-	//	jwErr := w.Write(jobSlice)
-	//	checkError(jwErr)
-	//}
-//}
 
 func ClearText(text string) string{
 	return strings.Join(strings.Fields(strings.TrimSpace(text))," ")
