@@ -6,6 +6,8 @@ import (
 	"google.golang.org/grpc"
 	"net"
 	"context"
+	"strings"
+	"github.com/achievermina/cloneIndeed/scrapper"
 )
 
 
@@ -14,26 +16,40 @@ type Server struct {
 }
 
 // proto file 에는 첫문장 capital 아니더라도 여기서는 Must 첫 letter capital
-func (s *Server) Search(ctx context.Context, searchTerm *sc_server.SearchRequest) (*sc_server.SearchResponse) {
-	log.Printf("get tasks search term: %v", searchTerm.Term)
+func (s *Server) Search(ctx context.Context, req *sc_server.SearchRequest) (*sc_server.SearchResponse) {
+	log.Printf("get tasks search term: %v", req.Term)
 	var jobs []*sc_server.JobObject
-	job1 := &sc_server.JobObject{
-		Id: "1",
-		Title: "programmer",
-		Location: "NY",
-		Salary: "$1000000",
-		Summary: "ASAP",
-	}
-	jobs = append(jobs, job1)
-	job2 := &sc_server.JobObject{
-		Id: "2",
-		Title: "programmer2",
-		Location: "NY",
-		Salary: "$1000000",
-		Summary: "ASAP",
-	}
-	jobs = append(jobs, job2)
+	//job1 := &sc_server.JobObject{
+	//	Id: "1",
+	//	Title: "programmer",
+	//	Location: "NY",
+	//	Salary: "$1000000",
+	//	Summary: "ASAP",
+	//}
+	//jobs = append(jobs, job1)
+	//job2 := &sc_server.JobObject{
+	//	Id: "2",
+	//	Title: "programmer2",
+	//	Location: "NY",
+	//	Salary: "$1000000",
+	//	Summary: "ASAP",
+	//}
+	//jobs = append(jobs, job2)
 
+	scrapperReqTerm := strings.ToLower(scrapper.ClearText(req.Term))
+	extractedJobs := sc_server.Scrape(scrapperReqTerm)
+
+	for  i := 0; i < len(extractedJobs); i++ {
+		cur := extractedJobs[i]
+		job := &sc_server.JobObject{
+			Id: cur.Id,
+			Title: cur.JobTitle,
+			Location: cur.Location,
+			Salary: cur.Salary,
+			Summary: cur.Summary,
+		}
+		jobs = append(jobs,job)
+	}
 	return &sc_server.SearchResponse{Jobs: jobs}
 }
 
@@ -51,7 +67,7 @@ func main() {
 
 
 //https://medium.com/the-andela-way/build-a-restful-json-api-with-golang-85a83420c9da
-
+//
 //func home(w http.ResponseWriter, r *http.Request) {
 //
 //	term, ok := r.URL.Query()["term"]  //query string --> GET
@@ -69,9 +85,9 @@ func main() {
 //	fmt.Println(res)
 //
 //}
-
-
-
+//
+//
+//
 //func main() {
 //	term := "python"
 //	fmt.Println(term)
@@ -97,7 +113,7 @@ func main() {
 //	//http.HandleFunc("/", home)
 //	//http.ListenAndServe(":8080", nil)
 //}
-
+//
 //type event struct {
 //	userID          string `json:"userID"`
 //	Title       string `json:"Title"`

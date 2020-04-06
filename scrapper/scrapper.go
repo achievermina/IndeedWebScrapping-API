@@ -7,24 +7,23 @@ import (
 	"github.com/PuerkitoBio/goquery"
 	"strings"
 	"log"
-	"encoding/json"
 )
 
 type extractedJob struct {
-	id string  `json:"ID"`
-	jobTitle string  `json:"Title"`
-	location string  `json:"Location"`
-	salary string  `json:"Salary"`
-	summary string  `json:"Description"`
+	Id string  `json:"ID"`
+	JobTitle string  `json:"Title"`
+	Location string  `json:"Location"`
+	Salary string  `json:"Salary"`
+	Summary string  `json:"Description"`
 }
 
 func Scrape(term string) []extractedJob{
 	var baseURL  = "https://www.indeed.com/jobs?q="+term+"&l=Brooklyn%2C+NY"
 	var mainC = make(chan []extractedJob)
 	var totalJobs []extractedJob
-	//totalPages := getPages(baseURL)
+	totalPages := getPages(baseURL)
 
-	for i := 0; i < 1; i++ {
+	for i := 0; i < totalPages; i++ {
 		go getPage(i, baseURL, mainC)
 	}
 
@@ -32,10 +31,9 @@ func Scrape(term string) []extractedJob{
 		jobs := <-mainC
 		totalJobs = append(totalJobs, jobs...)
 	}
-	//fmt.Println(totalJobs)
-	//writeJobs(totalJobs)
-	return totalJobs
+
 	fmt.Println("Done, Extracted all jobs")
+	return totalJobs
 }
 
 // Gather jobs in each page
@@ -47,7 +45,6 @@ func getPage(page int, baseURL string, mainC chan<-[]extractedJob) {
 	res, err := http.Get(pageURL)
 	checkError(err)
 	checkCode(res)
-
 
 	defer res.Body.Close()
 
@@ -81,7 +78,7 @@ func getPages(baseURL string) int {
 	pages := 0
 	res, err := http.Get(baseURL)
 	checkError(err)
-	checkCode(res)
+	//checkCode(res)
 
 	defer res.Body.Close()
 
@@ -94,14 +91,14 @@ func getPages(baseURL string) int {
 	return pages
 
 }
-
-func writeJobs(jobs []extractedJob) {
-	jobsJson, err := json.Marshal(jobs)
-	checkError(err)
-	fmt.Println("here")
-
-	fmt.Println(string(jobsJson))
-	//
+//
+//func writeJobs(jobs []extractedJob) {
+//	jobsJson, err := json.Marshal(jobs)
+//	checkError(err)
+//	fmt.Println("here")
+//
+//	fmt.Println(string(jobsJson))
+//	//
 	//w := csv.NewWriter(file)
 	//defer w.Flush()
 	//
@@ -115,7 +112,7 @@ func writeJobs(jobs []extractedJob) {
 	//	jwErr := w.Write(jobSlice)
 	//	checkError(jwErr)
 	//}
-}
+//}
 
 func ClearText(text string) string{
 	return strings.Join(strings.Fields(strings.TrimSpace(text))," ")

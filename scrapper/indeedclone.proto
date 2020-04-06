@@ -16,7 +16,7 @@ message jobObject {
 }
 
 message searchResponse {
-    repeated jobObject jobs = 1;
+    repeated jobObject jobs = 1 [packed=true];
 }
 
 service jobService {
