@@ -1,42 +1,25 @@
-FROM golang:onbuild
+FROM golang:alpine
 
-## Set necessary environmet variables needed for our image
-##ENV GO111MODULE=on \
-##    CGO_ENABLED=0 \
-##    GOOS=linux \
-##    GOARCH=amd64
-#
-## Move to working directory /build
-#WORKDIR /build
-#
-### Copy and download dependency using go mod
-##COPY go.mod .
-##COPY go.sum .
-##RUN go mod download
-#
-## Copy the code into the container
-#COPY . .
-#
-## Build the application
-#RUN go build -o main .
-#
-## Move to /dist directory as the place for resulting binary folder
-#WORKDIR /dist
-#
-## Copy binary from build to main folder
-#RUN cp /build/main .
-#
-## Export necessary port
-#EXPOSE 3000
-#
-## Command to run when starting the container
-#CMD ["/dist/main"]
+# Set necessary environmet variables needed for our image
+ENV GO111MODULE=on \
+    CGO_ENABLED=0 \
+    GOOS=linux \
+    GOARCH=amd64
 
-
-FROM golang:latest
-RUN mkdir /app
-ADD . /app/
+# Move to working directory /build
 WORKDIR /app
-RUN go build -o main .
+
+# Copy the code into the container
+COPY . /app
+
+RUN go mod download
+RUN go build -o main ./cmd
+
+# Export necessary port
 EXPOSE 3000
-CMD ["/app/main"]
+
+# Command to run when starting the container
+CMD ["./main"]
+
+
+#docker run -it go-dock:latest
