@@ -2,11 +2,13 @@ package scrapper
 
 import (
 	"fmt"
+	"github.com/achievermina/IndeedWebScrapping-API/scrapper/scrapperpb"
 	"strconv"
 	"net/http"
 	"github.com/PuerkitoBio/goquery"
 	"strings"
 	"log"
+	"context"
 )
 
 type extractedJob struct {
@@ -15,6 +17,28 @@ type extractedJob struct {
 	Location string  `json:"Location"`
 	Salary string  `json:"Salary"`
 	Summary string  `json:"Description"`
+}
+
+// proto file 에는 첫문장 capital 아니더라도 여기서는 Must 첫 letter capital
+func (s *Server) Search(ctx context.Context, req *scrapperpb.SearchRequest) (*scrapperpb.SearchResponse, error) {
+	log.Printf("get tasks search term: %v", req.Term)
+	var jobs []*scrapperpb.JobObject
+
+	scrapperReqTerm := strings.ToLower(ClearText(req.Term))
+	extractedJobs := Scrape(scrapperReqTerm)
+
+	for  i := 0; i < len(extractedJobs); i++ {
+		cur := extractedJobs[i]
+		job := &scrapperpb.JobObject{
+			Id: cur.Id,
+			Title: cur.JobTitle,
+			Location: cur.Location,
+			Salary: cur.Salary,
+			Summary: cur.Summary,
+		}
+		jobs = append(jobs,job)
+	}
+	return &scrapperpb.SearchResponse{Jobs: jobs}, nil
 }
 
 func Scrape(term string) []extractedJob{

@@ -2,7 +2,6 @@ syntax = "proto3";
 
 package scrapper;
 
-
 message searchRequest {
     string term =1;
 }
