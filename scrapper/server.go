@@ -16,7 +16,7 @@ type Server struct {
 
 func StartServer() {
 	//gRPC
-	listen, err := net.Listen("tcp", "0.0.0.0:50051")
+	listen, err := net.Listen("tcp", "0.0.0.0:8080")
 	if err != nil {
 		log.Fatalf("could not listen to 0.0.0.0:50051 %v", err)
 	}
