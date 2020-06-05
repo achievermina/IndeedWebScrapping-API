@@ -16,10 +16,10 @@ RUN go mod download
 RUN go build -o main ./cmd
 
 # Export necessary port
-EXPOSE 3000
+EXPOSE 8080
 
 # Command to run when starting the container
 CMD ["./main"]
 
-
-#docker run -it go-dock:latest
+#docker build . -t golang:cloneIndeed
+#docker run -p 8080:8080 golang:cloneIndeed

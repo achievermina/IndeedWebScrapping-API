@@ -1,14 +1,13 @@
 package scrapper
 
 import (
-	"fmt"
-	"github.com/achievermina/IndeedWebScrapping-API/scrapper/scrapperpb"
-	"strconv"
-	"net/http"
-	"github.com/PuerkitoBio/goquery"
-	"strings"
-	"log"
 	"context"
+	"github.com/PuerkitoBio/goquery"
+	"github.com/achievermina/IndeedWebScrapping-API/scrapper/scrapperpb"
+	"log"
+	"net/http"
+	"strconv"
+	"strings"
 )
 
 type extractedJob struct {
@@ -56,7 +55,7 @@ func Scrape(term string) []extractedJob{
 		totalJobs = append(totalJobs, jobs...)
 	}
 
-	fmt.Println("Done, Extracted all jobs")
+	log.Println("Done, Extracted all jobs")
 	return totalJobs
 }
 
@@ -65,7 +64,7 @@ func getPage(page int, baseURL string, mainC chan<-[]extractedJob) {
 	var jobs []extractedJob
 	c := make(chan extractedJob)
 	pageURL := baseURL + "&start=" + strconv.Itoa(page*10)
-	fmt.Println("Requesting: ", pageURL)
+	log.Println("Requesting: ", pageURL)
 	res, err := http.Get(pageURL)
 	checkError(err)
 	checkCode(res)
@@ -111,7 +110,7 @@ func getPages(baseURL string) int {
 	doc.Find(".pagination").Each(func(i int, s *goquery.Selection) {
 		pages = s.Find("a").Length() // how many page links are in there
 	})
-	fmt.Println(pages)
+	log.Println(pages)
 	return pages
 
 }

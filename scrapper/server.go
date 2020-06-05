@@ -16,12 +16,14 @@ type Server struct {
 
 func StartServer() {
 	//gRPC
+	listen, err := net.Listen("tcp", "0.0.0.0:50051")
+	if err != nil {
+		log.Fatalf("could not listen to 0.0.0.0:50051 %v", err)
+	}
 	var grpcServer = grpc.NewServer()
 	scrapperpb.RegisterJobServiceServer(grpcServer, &Server{})
-	listen, err := net.Listen("tcp", "0.0.0.0:3000")
-	if err != nil {
-		log.Fatalf("could not listen to 0.0.0.0:3000 %v", err)
+	if err := grpcServer.Serve(listen); err != nil {
+		log.Fatalf("failed to serve: %v", err)
 	}
 	log.Println("Server starting...")
-	log.Fatal(grpcServer.Serve(listen))
 }
